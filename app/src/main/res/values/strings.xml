@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Text Adventure</string>
+    <string name="edit_message">Enter a command</string>
+    <string name="button_send">Submit</string>
+</resources>
