@@ -87,8 +87,6 @@ public class MainActivity extends AppCompatActivity {
     }
     public void setUpStuff() {
         // Create rooms
-//        Room bridge = new Room("bridge",
-//                "the bridge of a once impressive starship, that has since taken heavy damage");
         Room messHall = new Room("mess hall", "a vast mess hall with a vaulted tritanium ceiling, that once housed many happy crewmen on their lunch breaks");
         Room armory = new Room("armory", "an armory once filled with potent weaponry, perhaps there is still something left..");
         Room brig = new Room("brig",
@@ -126,6 +124,7 @@ public class MainActivity extends AppCompatActivity {
             display=display.concat("You can't go that way from here.\n");
         } else {
             currentRoom = destination;
+            display=display.concat("You are in the "+currentRoom.getName()+"\n");
         }
         textView.setText(display);
     }
@@ -138,7 +137,6 @@ public class MainActivity extends AppCompatActivity {
         } else if (words[0].equals("attack")) {
             attack(words[1]);
         } else if (words[0].equals("go")) {
-            display=display.concat("You are in the "+currentRoom.getNeighbor(words[1]).getName()+"\n");
             go(words[1]);
         } else if (words[0].equals("look")) {
             look();
@@ -213,9 +211,6 @@ public class MainActivity extends AppCompatActivity {
         }
         textView.setText(display);
     }
-
-
-
     public void sendMessage(View view)
     {
         display="";
