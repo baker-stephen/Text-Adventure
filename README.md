@@ -3,7 +3,6 @@ A Sci-Fi Horror Text Adventure for Android
 
 Consisting of a mere 5 rooms (Bridge, Mess Hall, Armory, Brig, and Captains Quarters) and 5 commands (attack, go, look, take, save),
 much more hard coding needs to be done (or hopefully a way to create rooms more efficiently can to be devised).
-Known bugs: when a non-legitamate word is entered after a legitamate command, the app will crash (probably quick fix)
 Desired Readability Improvements: Separate MainActivity from the Text Adventure model or structure
 Desired Gameplay Improvements: Many more Rooms, Weapons, and things to save. Not an instant game over if you enter a room with an enemy
 with higher defense than your attack power. (Health possibly, perhaps some random chance in terms of attack power. i.e. it just makes it 
