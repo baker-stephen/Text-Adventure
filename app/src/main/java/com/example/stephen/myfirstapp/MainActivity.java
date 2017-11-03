@@ -3,6 +3,7 @@ package com.example.stephen.myfirstapp;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -15,21 +16,49 @@ public class MainActivity extends AppCompatActivity {
     private Room currentRoom;
     private int score;
     private String display="";
+    public final static String DISPLAY_KEY = "com.example.myfirstapp.DISPLAY";
+    public final static String ROOM_KEY = "com.example.myfirstapp.ROOM";
+    public final static String WEAPON_KEY ="com.example.myfirstapp.WEAPON";
+    private Room bridge;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         textView = (TextView) findViewById(R.id.textToDisplay);
-        setUpStuff();
-        display = display.concat("You are in the bridge\n");
-        display = display.concat("\n");
+        if(savedInstanceState!=null) {
+            display=savedInstanceState.getString(DISPLAY_KEY);
+            currentRoom = (Room) savedInstanceState.get(ROOM_KEY);
+            bestWeaponDamage = savedInstanceState.getInt(WEAPON_KEY);
+        }
+        else {
+            bridge = new Room("bridge",
+                    "the bridge of a once impressive starship, that has since taken heavy damage");
+            setUpStuff();
+            currentRoom = bridge;
+            bestWeaponDamage = 3;
+            display = display.concat("You are in the bridge\n");
+            display = display.concat("\n");
+            textView.setText(display);
+            listCommands();
+        }
         textView.setText(display);
-        listCommands();
-        textView.setText(display);
-
-
     }
+    @Override
+    public void onRestoreInstanceState(Bundle savedInstanceState) {
+        textView.setText(savedInstanceState.getString(DISPLAY_KEY));
+        currentRoom = (Room) savedInstanceState.get(ROOM_KEY);
+        bestWeaponDamage = savedInstanceState.getInt(WEAPON_KEY);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putString(DISPLAY_KEY, display);
+        outState.putParcelable(ROOM_KEY, currentRoom);
+        outState.putInt(WEAPON_KEY, bestWeaponDamage);
+        super.onSaveInstanceState(outState);
+    }
+
     public void attack(String name) {
         Monster monster = currentRoom.getMonster();
         if (monster != null && monster.getName().equals(name)) {
@@ -58,8 +87,8 @@ public class MainActivity extends AppCompatActivity {
     }
     public void setUpStuff() {
         // Create rooms
-        Room bridge = new Room("bridge",
-                "the bridge of a once impressive starship, that has since taken heavy damage");
+//        Room bridge = new Room("bridge",
+//                "the bridge of a once impressive starship, that has since taken heavy damage");
         Room messHall = new Room("mess hall", "a vast mess hall with a vaulted tritanium ceiling, that once housed many happy crewmen on their lunch breaks");
         Room armory = new Room("armory", "an armory once filled with potent weaponry, perhaps there is still something left..");
         Room brig = new Room("brig",
@@ -87,8 +116,8 @@ public class MainActivity extends AppCompatActivity {
         // Create and install weapons
         armory.setWeapon(new Weapon("destructonator", 5, "the fantastic destructonator, illegal in seven systems, lying on the ground before you"));
         // The player starts in the bridge, armed with a sword
-        currentRoom = bridge;
-        bestWeaponDamage = 3;
+//        currentRoom = bridge;
+//        bestWeaponDamage = 3;
     }
     /** Moves in the specified direction, if possible. */
     public void go(String direction) {

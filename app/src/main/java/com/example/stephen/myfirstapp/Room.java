@@ -1,11 +1,14 @@
 package com.example.stephen.myfirstapp;
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.util.ArrayList;
 
 /**
  * Created by Stephen on 10/25/2017.
  */
 
-public class Room {
+public class Room implements Parcelable {
     /** description of the room */
     private String description;
     /** a list of the names of the exits */
@@ -23,13 +26,14 @@ public class Room {
 
     public Room(String name, String description) {
         this.name = name;
-        this.description=description;
+        this.description = description;
         exits = new ArrayList<String>(4);
-        neighbors= new ArrayList<Room>(4);
-        monster=null;
-        treasure=null;
-        weapon=null;
+        neighbors = new ArrayList<Room>(4);
+        monster = null;
+        treasure = null;
+        weapon = null;
     }
+
 
     /**@return the name of this room */
     public String getName() {
@@ -91,4 +95,45 @@ public class Room {
     public void setWeapon(Weapon weapon) {
         this.weapon = weapon;
     }
+
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeStringArray(new String[] {this.name, this.description});
+        dest.writeStringList(this.exits);
+        dest.writeTypedList(this.neighbors);
+        dest.writeArray(new Object[] {this.monster, this.weapon, this.treasure});
+
+    }
+    // Parcel constructor
+    public Room(Parcel in) {
+        String[] nameAndDescriptionData = new String[2];
+        ArrayList<String> exitData = new ArrayList<String>(1);
+        ArrayList<Room> neighborData = new ArrayList<Room>(1);
+        Object[] otherData = new Object[3];
+        in.readStringArray(nameAndDescriptionData);
+        in.readStringList(exitData);
+        in.readTypedList(neighborData, Room.CREATOR);
+        otherData=in.readArray(Object.class.getClassLoader());
+        this.name=nameAndDescriptionData[0];
+        this.description=nameAndDescriptionData[1];
+        this.exits=exitData;
+        this.neighbors=neighborData;
+        this.monster=(Monster) otherData[0];
+        this.weapon= (Weapon) otherData[1];
+        this.treasure= (Treasure) otherData[2];
+    }
+    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+        public Room createFromParcel(Parcel in) {
+            return new Room(in);
+        }
+
+        public Room[] newArray(int size) {
+            return new Room[size];
+        }
+    };
 }
