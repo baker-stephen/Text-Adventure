@@ -1,6 +1,8 @@
 package com.example.stephen.myfirstapp;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -19,13 +21,18 @@ public class MainActivity extends AppCompatActivity {
     public final static String DISPLAY_KEY = "com.example.myfirstapp.DISPLAY";
     public final static String ROOM_KEY = "com.example.myfirstapp.ROOM";
     public final static String WEAPON_KEY ="com.example.myfirstapp.WEAPON";
+    public final static String SAVER_KEY = "com.example.myfirstapp.SAVER";
+    public final static String PREFS_KEY = "com.example.myfirstapp.PREFS";
     private Room bridge;
+    private int completedGames;
+    private SharedPreferences prefs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         textView = (TextView) findViewById(R.id.textToDisplay);
+        prefs = getApplicationContext().getSharedPreferences(PREFS_KEY, Context.MODE_PRIVATE);
         if(savedInstanceState!=null) {
             display=savedInstanceState.getString(DISPLAY_KEY);
             currentRoom = (Room) savedInstanceState.get(ROOM_KEY);
@@ -50,7 +57,6 @@ public class MainActivity extends AppCompatActivity {
         currentRoom = (Room) savedInstanceState.get(ROOM_KEY);
         bestWeaponDamage = savedInstanceState.getInt(WEAPON_KEY);
     }
-
     @Override
     public void onSaveInstanceState(Bundle outState) {
         outState.putString(DISPLAY_KEY, display);
@@ -58,7 +64,6 @@ public class MainActivity extends AppCompatActivity {
         outState.putInt(WEAPON_KEY, bestWeaponDamage);
         super.onSaveInstanceState(outState);
     }
-
     public void attack(String name) {
         Monster monster = currentRoom.getMonster();
         if (monster != null && monster.getName().equals(name)) {
@@ -132,7 +137,7 @@ public class MainActivity extends AppCompatActivity {
         String[] words = line.split(" ");
         if (currentRoom.getMonster() != null
                 && !(words[0].equals("attack") || words[0].equals("look"))) {
-            display=display.concat("You can't do that with unfriendlies about.\n");
+            display = display.concat("You can't do that with unfriendlies about.\n");
             listCommands();
         } else if (words[0].equals("attack")) {
             attack(words[1]);
@@ -142,9 +147,14 @@ public class MainActivity extends AppCompatActivity {
             look();
         } else if (words[0].equals("take")) {
             take(words[1]);
-        }else if (words[0].equals("save")) {
-            save(words[1]);
-        } else {
+        } else if (words[0].equals("rescue")) {
+            rescue(words[1]);
+        } else if (words[0].equals("reset")) {
+            reset();
+        } else if (words[0].equals("get")) {
+            get(words[1]);
+        }
+        else {
             display=display.concat("I don't understand that.\n");
             listCommands();
         }
@@ -156,7 +166,7 @@ public class MainActivity extends AppCompatActivity {
         display=display.concat("  go north\n");
         display=display.concat("  look\n");
         display=display.concat("  take destructonator\n");
-        display=display.concat("  save guest\n");
+        display=display.concat("  rescue guest\n");
         textView.setText(display);
     }
     /** Prints a description of the current room and its contents. */
@@ -190,7 +200,7 @@ public class MainActivity extends AppCompatActivity {
         }
         textView.setText(display);
     }
-    public void save(String name) {
+    public void rescue(String name) {
         Treasure treasure = currentRoom.getTreasure();
         if (treasure != null && treasure.getName().equals(name)) {
             currentRoom.setTreasure(null);
@@ -200,16 +210,50 @@ public class MainActivity extends AppCompatActivity {
             if (score == 100) {
                 display=display.concat("\n");
                 display=display.concat("You have won, but the space demon may return...\n");
+                saveOnComplete();
             }
             if (score==600) {
                 display=display.concat("\n");
                 display=display.concat("You have won! The space demon's influence is banished forever by the might of the CAT!\n");
+                saveOnComplete();
             }
         }
         else {
             display=display.concat("There is no " + name + " here.\n");
         }
         textView.setText(display);
+    }
+    public void saveOnComplete() {
+        completedGames++;
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putInt(SAVER_KEY, completedGames);
+        editor.commit();
+        if (prefs.contains(SAVER_KEY)) {
+            display = display.concat("Game successfully saved.\nYou have completed "+prefs.getInt(SAVER_KEY,0)+" games\n");
+        }
+        else {
+            display =display.concat("Game save failed. Shit.\n");
+        }
+
+    }
+    public void get(String what) {
+       // prefs= getSharedPreferences(PREFS_KEY, Context.MODE_PRIVATE);
+        if (!what.equals("completed"))
+            display=display.concat("not valid");
+        else {
+            if (prefs.contains(SAVER_KEY)) {
+                display = display.concat("You have completed "+prefs.getInt(SAVER_KEY,0)+" games\n");
+            }
+            else {
+                display = display.concat("You haven't completed a single game");
+            }
+        }
+    }
+    public void reset() {
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.clear();
+        editor.commit();
+        display=display.concat("Completed games have reset.");
     }
     public void sendMessage(View view)
     {
